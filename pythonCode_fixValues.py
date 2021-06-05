@@ -1,3 +1,17 @@
+def cropScenes(scene):
+  aboveCut = 40
+  belowCut = 370
+  leftCut = 50
+  rightCut = 470
+  return scene[aboveCut:belowCut,leftCut:rightCut,:]
+
+def neighbourMatrix(matrix,mean):
+  Ux = np.where(matrix>mean+50)[0]
+  Uy = np.where(matrix>mean+50)[1]
+  for s in range(len(Ux)):
+    matrix[Ux[s],Uy[s]] = mean
+  return matrix
+
 import os
 import nibabel as nib
 import numpy as np 
@@ -5,7 +19,6 @@ import numpy as np
 # Edit folder_path
 folder_path = 'D:\\Python\\Projects\\fixProstateSeeding\\dset'
 
-######
 subdirectories = os.listdir(folder_path)
 counter = 0
 for i in subdirectories: 
@@ -13,17 +26,18 @@ for i in subdirectories:
   print('%',int(counter/len(subdirectories)*100),' of dataset is processed.')
   if os.path.isdir(os.path.join(folder_path,i)):	
     if len(os.listdir(os.path.join(folder_path,i))) != 0:
-      rs = nib.load(os.path.join(os.path.join(folder_path,i),'Structure.nii')).get_fdata()
-      ct = nib.load(os.path.join(os.path.join(folder_path,i),'CT.nii')).get_fdata()
+      rd = cropScenes(nib.load(os.path.join(os.path.join(folder_path,i),'RD.nii')).get_fdata())
+      rs = cropScenes(nib.load(os.path.join(os.path.join(folder_path,i),'Structure.nii')).get_fdata())
+      ct = cropScenes(nib.load(os.path.join(os.path.join(folder_path,i),'CT.nii')).get_fdata())
       ctAffine = nib.load(os.path.join(os.path.join(folder_path,i),'CT.nii')).affine
-      ctFixed = np.zeros(ct.shape)
       II = np.where(rs == 1)[0]
       JJ = np.where(rs == 1)[1]
       ZZ = np.where(rs == 1)[2]
       prostateMeanVal = np.mean(ct[II,JJ,ZZ])
       for x in range(len(II)):
-        if ct[II[x],JJ[x],ZZ[x]] > prostateMeanVal+50:
+        if ct[II[x],JJ[x],ZZ[x]] > 3000:
           ct[II[x],JJ[x],ZZ[x]] = prostateMeanVal
+          ct[II[x]-5:II[x]+5,JJ[x]-5:JJ[x]+5,ZZ[x]] = neighbourMatrix(ct[II[x]-5:II[x]+5,JJ[x]-5:JJ[x]+5,ZZ[x]],prostateMeanVal)
       niftiImg = nib.Nifti1Image(ct,ctAffine) 
       folderAddress = os.path.join(folder_path,i)
-      nib.save(niftiImg,folderAddress+'\\CT_Fixed6.nii')
+      nib.save(niftiImg,folderAddress+'\\CT_Fixed.nii')
