@@ -1,6 +1,5 @@
 %% main application 
 clear; close all 
-cd('D:\Matlab\ROI2DoseReg\4')
 
 CurrentAddress = pwd;
 % addpath(CurrentAddress) 
