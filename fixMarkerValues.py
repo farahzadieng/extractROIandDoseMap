@@ -3,10 +3,10 @@ import nibabel as nib
 import numpy as np 
 
 def cropScenes(scene):
-  aboveCut = 40
-  belowCut = 370
-  leftCut = 50
-  rightCut = 470
+  aboveCut = 33
+  belowCut = 369
+  leftCut = 48
+  rightCut = 472
   return scene[aboveCut:belowCut,leftCut:rightCut,:]
 
 def neighbourMatrix(matrix,mean):
