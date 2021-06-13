@@ -28,7 +28,9 @@ for i in subdirectories:
   if os.path.isdir(os.path.join(folder_path,i)):	
     if len(os.listdir(os.path.join(folder_path,i))) != 0:
       rd = cropScenes(nib.load(os.path.join(os.path.join(folder_path,i),'RD.nii')).get_fdata())
+	  rdAffine = nib.load(os.path.join(os.path.join(folder_path,i),'RD.nii')).affine
       rs = cropScenes(nib.load(os.path.join(os.path.join(folder_path,i),'Structure.nii')).get_fdata())
+	  rsAffine = nib.load(os.path.join(os.path.join(folder_path,i),'Structure.nii')).affine
       ct = cropScenes(nib.load(os.path.join(os.path.join(folder_path,i),'CT.nii')).get_fdata())
       ctAffine = nib.load(os.path.join(os.path.join(folder_path,i),'CT.nii')).affine
       II = np.where(rs == 1)[0]
@@ -44,7 +46,11 @@ for i in subdirectories:
       ZZ2 = np.where(ct>2500)[2]
       for x in range(len(II2)):
         ct[II2[x],JJ2[x],ZZ2[x]] = 2500
-
-      niftiImg = nib.Nifti1Image(ct,ctAffine) 
+	  
+	  ctNii = nib.Nifti1Image(ct,ctAffine)
+      rsNiii = nib.Nifti1Image(rs,rsAffine)
+	  rdNii = nib.Nifti1Image(rd,rdAffine)
       folderAddress = os.path.join(folder_path,i)
-      nib.save(niftiImg,folderAddress+'\\CT_modified.nii')
+      nib.save(rsNiii,folderAddress+'\\RS_modified.nii')
+	  nib.save(rdAffine,folderAddress+'\\RD_modified.nii')
+	  nib.save(ctNii,folderAddress+'\\CT_modified.nii')
